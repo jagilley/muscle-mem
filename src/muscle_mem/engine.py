@@ -16,8 +16,16 @@ R = TypeVar("R")
 
 
 class Engine(Generic[P, R]):
-    def __init__(self):
-        self.db: DB = DB()  # todo
+    def __init__(self, db: Optional[DB] = None, persistence_file: Optional[str] = None):
+        if db is not None and persistence_file is not None:
+            raise ValueError("Cannot specify both db and persistence_file")
+        
+        if persistence_file is not None:
+            self.db: DB = DB(file_path=persistence_file)
+        elif db is not None:
+            self.db: DB = db
+        else:
+            self.db: DB = DB()  # In-memory only
 
         self.finalized = False
 
