@@ -58,7 +58,12 @@ It manages its own cache of previous trajectories, and determines when to invoke
 ```python
 from muscle_mem import Engine
 
+# In-memory caching (default)
 engine = Engine()
+
+# Disk persistence - cache survives across runs
+engine = Engine(persistence_file="cache.pkl")
+
 engine.set_agent(your_agent).finalize()
 
 # your agent is independently callable
@@ -80,6 +85,35 @@ engine("do some task", tags=["some task"]) # cache hit
 
 engine("do some task", tags=["different task"]) # cache miss
 engine("do some task", tags=["different task"]) # cache hit
+```
+
+## Disk Persistence
+
+By default, the Engine stores trajectories in memory, which means the cache is lost when your program exits. For persistent caching across runs, configure the Engine with a file path:
+
+```python
+engine = Engine(persistence_file="cache.pkl")
+```
+
+This automatically:
+- Loads existing trajectories from disk when the Engine is created
+- Saves new trajectories to disk after each recording
+- Uses pickle format for serialization
+
+**Example workflow:**
+```bash
+# First run - creates trajectory and saves to disk
+python your_agent.py
+
+# Second run - loads cache from disk and gets cache hits
+python your_agent.py
+```
+
+The cache file is created in the current working directory by default. Use absolute paths for specific locations:
+
+```python
+import os
+engine = Engine(persistence_file=os.path.abspath("./cache/trajectories.pkl"))
 ```
 
 ## Tool Instrumentation
@@ -267,9 +301,10 @@ cache_hit = engine("erik")
 assert not cache_hit
 ```
 
-For a more real example, see a computer-use agent implementation:
+For more real examples, see:
 
-[https://github.com/pig-dot-dev/muscle-mem/blob/main/examples/cua.py](https://github.com/pig-dot-dev/muscle-mem/blob/main/examples/cua.py)
+- **Computer-use agent**: [https://github.com/pig-dot-dev/muscle-mem/blob/main/examples/cua.py](https://github.com/pig-dot-dev/muscle-mem/blob/main/examples/cua.py)
+- **Disk persistence example**: [https://github.com/pig-dot-dev/muscle-mem/blob/main/examples/cua-disk.py](https://github.com/pig-dot-dev/muscle-mem/blob/main/examples/cua-disk.py)
 
 ---
 
